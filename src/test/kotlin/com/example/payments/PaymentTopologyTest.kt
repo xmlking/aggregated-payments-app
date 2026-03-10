@@ -3,20 +3,19 @@ package com.example.payments
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 
-class PaymentTopologyTest : StringSpec({
+class PaymentTopologyTest :
+    StringSpec({
 
-    "simple aggregation logic test" {
+        "simple aggregation logic test" {
 
-        val visa = 100.0
-        val mc = 50.0
+            val visa = 100.0
+            val mc = 50.0
 
-        val total = visa + mc
+            val total = visa + mc
 
-        total shouldBe 150.0
-    }
-
-})
-
+            total shouldBe 150.0
+        }
+    })
 
 /*
 import com.example.payments.model.*

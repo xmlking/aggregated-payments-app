@@ -6,7 +6,7 @@
 
 Start kafka
 
-```bash
+```shell
 # start all - redpanda and console
 docker compose up
 
@@ -28,7 +28,7 @@ rpk topic consume city-out-topic
 
 Start µService
 
-```bash
+```shell
 gradle bootRun
 # log at debug level
 gradle bootRun --debug
@@ -36,14 +36,14 @@ gradle bootRun --debug
 
 ## Build
 
-```bash
+```shell
 gradle spotlessApply
 gradle build
 ```
 
 ## Test
 
-```bash
+```shell
 # list all schemas 
 curl -s \
   "http://localhost:8081/subjects" \
@@ -58,11 +58,18 @@ curl -s \
   | jq .
 ```
 
+## Lint
+
+```shell
+ktlint --format
+# or
+ktlint -F
+```
 ## Operations
 
 ### Metrics
 
-```bash
+```shell
 curlie :3000/actuator
 
 curlie :3000/actuator/health
@@ -84,7 +91,7 @@ curlie :3000/actuator/kafkastreamstopology/print-applicationId
 
 ### Binding control
 
-```bash
+```shell
 curl -d '{"state":"STOPPED"}' -H "Content-Type: application/json" -X POST localhost:3000/actuator/bindings/payments-in-0
 curlie :3000/actuator/bindings/payments-in-0
 curl -d '{"state":"STARTED"}' -H "Content-Type: application/json" -X POST localhost:3000/actuator/bindings/payments-in-0

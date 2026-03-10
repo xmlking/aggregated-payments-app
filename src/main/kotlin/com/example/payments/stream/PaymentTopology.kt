@@ -8,11 +8,10 @@ import java.util.function.Function
 
 @Configuration
 class PaymentTopology {
-
+    @Suppress("UNCHECKED_CAST")
     @Bean
-    fun payments(): Function<Array<KStream<String, *>>, KStream<String, AggregatedPayment>> {
-
-        return Function { streams ->
+    fun payments(): Function<Array<KStream<String, *>>, KStream<String, AggregatedPayment>> =
+        Function { streams ->
 
             val visa = streams[0] as KStream<String, VisaPayment>
             val mc = streams[1] as KStream<String, MastercardPayment>
@@ -22,16 +21,16 @@ class PaymentTopology {
             val mcTable = mc.toTable()
             val giftTable = gift.toTable()
 
-            val visaMc = visaTable.join(mcTable) { v, m ->
-                AggregatedPayment(v.transactionId, v, m, null)
-            }
+            val visaMc =
+                visaTable.join(mcTable) { v, m ->
+                    AggregatedPayment(v.transactionId, v, m, null)
+                }
 
-            val full = visaMc.join(giftTable) { agg, g ->
-                agg.copy(giftcard = g)
-            }
+            val full =
+                visaMc.join(giftTable) { agg, g ->
+                    agg.copy(giftcard = g)
+                }
 
             full.toStream()
         }
-    }
 }
-

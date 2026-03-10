@@ -4,7 +4,10 @@ import com.github.avrokotlin.avro4k.*
 import kotlinx.serialization.*
 
 @Serializable
-data class Project(val name: String, val language: String)
+data class Project(
+    val name: String,
+    val language: String,
+)
 
 fun main() {
     // Generating schemas

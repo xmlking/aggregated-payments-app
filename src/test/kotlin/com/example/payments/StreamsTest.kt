@@ -3,13 +3,13 @@ package com.example.payments
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 
-class StreamsTest : StringSpec({
+class StreamsTest :
+    StringSpec({
 
-    "should aggregate payments" {
+        "should aggregate payments" {
 
-        val transactionId = "tx-1"
+            val transactionId = "tx-1"
 
-        transactionId.length shouldBe 4
-    }
-
-})
+            transactionId.length shouldBe 4
+        }
+    })
