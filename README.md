@@ -12,18 +12,26 @@ docker compose up
 
 rpk version
 rpk cluster info
-rpk topic delete state-out-0 city-in-0
+rpk topic delete visa-payments mastercard-payments giftcard-payments aggregated-payments
+
+# create topic
+rpk topic create -c cleanup.policy=compact -r 1 -p 1 visa-payments 
+rpk topic create -c cleanup.policy=compact -r 1 -p 1 mastercard-payments
+rpk topic create -c cleanup.policy=compact -r 1 -p 1 giftcard-payments
+rpk topic create -c cleanup.policy=compact -r 1 -p 1 aggregated-payments
 
 # produce
-rpk topic produce all-in-topic -k my-key
-{"name": "Red", "city": "nuur", "state": "ca"}
-{"name": "Red2", "city": "nuur2", "state": "ca"}
+rpk topic produce visa-payments -k tansaction-id-1
+{"transactionId": " tansaction-id-1", "amount": 121, "currency": "USD"}
+{"transactionId": " tansaction-id-2", "amount": 122, "currency": "USD"}
 # or
-echo '{"name": "Red", "city": "nuur", "state": "ca"}' | rpk topic produce all-in-topic -k my-key
+echo '{"transactionId": " tansaction-id-1", "amount": 131}' | rpk topic produce mastercard-payments -k tansaction-id-1
+echo '{"transactionId": " tansaction-id-1", "amount": 141}' | rpk topic produce giftcard-payments -k tansaction-id-1
 # consume
-rpk topic consume all-in-topic
-rpk topic consume state-out-topic
-rpk topic consume city-out-topic
+rpk topic consume visa-payments
+rpk topic consume mastercard-payments
+rpk topic consume giftcard-payments
+rpk topic consume aggregated-payments
 ```
 
 Start µService
@@ -50,11 +58,11 @@ curl -s \
   | jq .
 # get schemas for `all-in-topic-value`
 curl -s \
-  "http://localhost:8081/subjects/all-in-topic-value/versions/1" \
+  "http://localhost:8081/subjects/aggregated-payments-value/versions/1" \
   | jq '.schema | fromjson' 
 # (or) you can see ` "sensitive": "true"` property.
 curl -s \
-  "http://localhost:8081/subjects/all-in-topic-value/versions/latest/schema" \
+  "http://localhost:8081/subjects/aggregated-payments-value/versions/latest/schema" \
   | jq .
 ```
 

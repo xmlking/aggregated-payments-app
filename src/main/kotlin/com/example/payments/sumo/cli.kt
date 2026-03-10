@@ -1,6 +1,9 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.example.payments.sumo
 
 import com.github.avrokotlin.avro4k.*
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.*
 
 @Serializable
@@ -9,10 +12,24 @@ data class Project(
     val language: String,
 )
 
+private val logger = KotlinLogging.logger {}
+
 fun main() {
     // Generating schemas
     val schema = Avro.schema<Project>()
-    println(schema.toString()) // {"type":"record","name":"Project","namespace":"myapp","fields":[{"name":"name","type":"string"},{"name":"language","type":"string"}]}
+    // {"type":"record","name":"Project","namespace":"myapp","fields":[{"name":"name","type":"string"},{"name":"language","type":"string"}]}
+    println(schema.toString())
+
+    logger.info { "Printing schema..." }
+    logger.atWarn {
+        message = schema.toString()
+        payload =
+            buildMap(capacity = 3) {
+                put("foo", 1)
+                put("bar", "x")
+                put("obj", Pair(2, 3))
+            }
+    }
 
     // Serializing objects
     val data = Project("kotlinx.serialization", "Kotlin")

@@ -1,4 +1,7 @@
 val kotestVersion = "6.1.5"
+val kotlinLoggingVersion = "8.0.01"
+var logbackVersion = "1.5.32"
+
 plugins {
     kotlin("jvm") version "2.3.10"
     kotlin("plugin.spring") version "2.3.10"
@@ -45,6 +48,8 @@ dependencies {
 
     // Kotlin
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
+//    implementation("ch.qos.logback:logback-classic:$logbackVersion")
 
     // Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core")
