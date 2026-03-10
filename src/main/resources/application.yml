@@ -1,0 +1,83 @@
+server:
+  port: 3000
+  shutdown: graceful # also set `timeout-per-shutdown-phase`
+# ==================== logging ============================
+logging:
+  level:
+    com.example.payments: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.springframework.graphql: DEBUG
+    org.springframework.security: DEBUG
+# ==================== management ==========================
+management:
+  info:
+    env:
+      enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env,prometheus,bindings,kafkastreamstopology
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+# ==================== spring ==============================
+spring:
+  application:
+    name: aggregated-payments
+  lifecycle:
+    timeout-per-shutdown-phase: "10s"
+
+  # ====================== spring-kafka =====================
+  kafka:
+    properties:
+      # Broker
+      bootstrap.servers: localhost:19092
+      # Schema Registry
+      schema.registry.url: http://localhost:8081
+  # ================= spring-cloud-functions ===================
+  cloud:
+    function:
+      definition: payments
+    # ================= spring-cloud-stream ======================
+    stream:
+      bindings:
+        payments-in-0:
+          destination: visa-payments
+        payments-in-1:
+          destination: mastercard-payments
+        payments-in-2:
+          destination: giftcard-payments
+        payments-out-0:
+          destination: aggregated-payments
+      # ============ spring-cloud-stream kstreams-binder============
+      kafka:
+        streams:
+          binder:
+            configuration:
+              processing.guarantee: exactly_once_v2
+              commit.interval.ms: 100
+
+  # ====================security=================================
+
+  # ====================devtools=================================
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: false
+
+# ==================== application properties  =============
+feature:
+  postMvp:
+    enabled: false

@@ -1,0 +1,130 @@
+services:
+  ###########################################################################
+  # postgres database with pgvector
+  # docker compose exec -it postgres psql -U postgres -d postgres
+  # psql -U postgres -d postgres -h localhost
+  # Commands:  \l , \c postgres ,  \dn, \du, \dt, \df, \dv, \d+ account
+  ###########################################################################
+  postgres:
+    image: timescale/timescaledb:latest-pg18-oss
+    hostname: postgres
+    container_name: postgres
+    restart: unless-stopped
+    profiles: [optional]
+    command: |
+      postgres
+      -c wal_level=logical
+      -c max_wal_senders=10
+      -c max_replication_slots=10
+      -c max_connections=200
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -q"]
+      interval: 60s
+      start_period: 1m
+      start_interval: 10s
+      timeout: 15s
+      retries: 5
+    ports:
+      - "5432:5432"
+    volumes:
+      - type: volume
+        source: pg_data
+        target: /var/lib/postgresql
+        read_only: false
+      # - ./config/postgres/init-database.sh:/docker-entrypoint-initdb.d/init-data.sh:Z
+  ###########################################################################
+  # kafka broker + schema registry
+  # Open:
+  # https://redpanda.localhost.direct/
+  ###########################################################################
+  redpanda:
+    image: redpandadata/redpanda:v25.3.9
+    hostname: redpanda
+    container_name: redpanda
+    restart: unless-stopped
+    expose:
+      - 8081
+      - 8082
+      - 9644
+      - 9092
+      - 19092
+    ports:
+      - "8081:8081"
+      - "8082:8082"
+      - "19092:19092"
+      - "9644:9644"
+    volumes:
+      - redpanda:/var/lib/redpanda/data
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp
+      - "1"
+      - --memory
+      - "1G"
+      - --reserve-memory
+      - "0M"
+      - --node-id
+      - "0"
+      - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
+      # Address the broker advertises to clients that connect to the Kafka API.
+      # Use the internal addresses to connect to the Redpanda brokers' from inside the same Docker network.
+      # Use the external addresses to connect to the Redpanda brokers' from outside the Docker network.
+      - --advertise-kafka-addr internal://redpanda:9092,external://localhost:19092
+      # Address the broker advertises to clients that connect to the HTTP Proxy.
+      # - --advertise-pandaproxy-addr redpanda:8082
+      - --advertise-pandaproxy-addr internal://redpanda:8082,external://localhost:8082
+      - --schema-registry-addr internal://redpanda:8081,external://localhost:8081
+      # Mode dev-container uses well-known configuration properties for development in containers.
+      - --mode dev-container
+      - --check=false
+      - --set redpanda.enable_transactions=true
+      - --set redpanda.enable_idempotence=true
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -E 'Healthy:.+true' || exit 1"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+  ###########################################################################
+  # Redpanda Console
+  # http://localhost:8080/admin/health
+  # http://localhost:8080/admin/startup
+  # http://localhost:8080/admin/metrics
+  # Docs: https://github.com/redpanda-data/console/blob/master/docs/features/protobuf.md
+  ###########################################################################
+  console:
+    image: redpandadata/console:v3.5.3
+    hostname: console
+    container_name: console
+    environment:
+      KAFKA_BROKERS: 'redpanda:9092'
+      KAFKA_CLIENTID: 'rpconsole;broker_count=1;host_override=redpanda'
+      SCHEMAREGISTRY_ENABLED: 'true'
+      SCHEMAREGISTRY_URLS: http://redpanda:8081
+      #KAFKACONNECT_ENABLED: true
+      #KAFKACONNECT_CLUSTERS_NAME: Connectors
+      #KAFKACONNECT_CLUSTERS_URLS: http://connect:8083
+      REDPANDA_ADMINAPI_ENABLED: 'true'
+      REDPANDA_ADMINAPI_URLS: http://redpanda:9644
+    ports:
+      - '8080:8080'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/admin/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      redpanda:
+        condition: service_healthy
+###########################################################################
+# volumes
+###########################################################################
+volumes:
+  pg_data: {}
+  redpanda: {}
