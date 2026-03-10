@@ -3,6 +3,12 @@
 ## Prerequisites
 
 ```shell
+brew install curlie
+brew install ktlint
+brew install redpanda-data/tap/redpanda
+```
+
+```shell
 sdk rm java
 sdk i java 21.0.10-tem
 java --version
