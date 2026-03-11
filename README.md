@@ -116,6 +116,18 @@ implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka")
 implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka-streams")
  ```
 
+## Maintenance
+
+Update Gradle wrapper 
+```shell
+./gradlew wrapper --gradle-version 9.4.0  --distribution-type all
+```
+
+show outdated dependencies
+```shell
+gradle dependencyUpdates -Drevision=release
+```
+
 ## Reference
 - [Fictional Spring Cloud Streams](https://github.com/spring-cloud/spring-cloud-stream/blob/main/docs/src/main/asciidoc/spring-cloud-stream.adoc#functions-with-multiple-input-and-output-arguments)
 - [Introducing Java Functions for Spring Cloud Stream Applications - Part 0](https://spring.io/blog/2020/07/13/introducing-java-functions-for-spring-cloud-stream-applications-part-0)

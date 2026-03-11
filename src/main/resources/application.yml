@@ -37,21 +37,17 @@ spring:
     name: aggregated-payments
   lifecycle:
     timeout-per-shutdown-phase: "10s"
-
-  # ====================== spring-kafka =====================
-  kafka:
-    properties:
-      # Broker
-      bootstrap.servers: localhost:19092
-      # Schema Registry
-      schema.registry.url: http://localhost:8081
-  # ================= spring-cloud-functions ===================
   cloud:
     function:
-      definition: payments
-    # ================= spring-cloud-stream ======================
+#      definition: payments
+      definition: uppercase
     stream:
       bindings:
+        uppercase-in-0:
+          destination: "uppercase.in"
+        uppercase-out-0:
+          destination: "uppercase.out"
+
         payments-in-0:
           destination: visa-payments
         payments-in-1:
@@ -60,13 +56,22 @@ spring:
           destination: giftcard-payments
         payments-out-0:
           destination: aggregated-payments
-      # ============ spring-cloud-stream kstreams-binder============
+
+#      # see DefaultPollerProperties
+#      poller:
+#        # call the Supplier Bean every 2 second
+#        fixed-delay: 2000
       kafka:
         streams:
           binder:
+            applicationId: "${spring.application.name}"
+            brokers: "localhost:19092"
             configuration:
               processing.guarantee: exactly_once_v2
               commit.interval.ms: 100
+#              default:
+#                key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+#                value.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
 
   # ====================security=================================
 

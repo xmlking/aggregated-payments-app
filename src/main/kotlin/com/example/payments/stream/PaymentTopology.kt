@@ -8,11 +8,19 @@ import org.apache.kafka.streams.kstream.KStream
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.util.function.Function
+import kotlin.text.uppercase
 
 private val logger = KotlinLogging.logger {}
 
 @Configuration
 class PaymentTopology {
+    @Bean
+    fun uppercase(): Function<KStream<String, String>, KStream<String, String>> =
+        Function {
+            it.peek { k, v -> logger.info { "State: $k, $v" } }
+            it.mapValues { v -> v.uppercase() }
+        }
+
     @Suppress("UNCHECKED_CAST")
     @Bean
     fun payments(): Function<Array<KStream<String, *>>, KStream<String, AggregatedPayment>> =
