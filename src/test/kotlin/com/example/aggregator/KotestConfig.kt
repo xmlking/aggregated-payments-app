@@ -1,4 +1,4 @@
-package com.example.payments
+package com.example.aggregator
 
 import io.kotest.core.config.AbstractProjectConfig
 import io.kotest.core.extensions.Extension

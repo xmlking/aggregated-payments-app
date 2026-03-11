@@ -1,4 +1,4 @@
-package com.example.payments
+package com.example.aggregator
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe

@@ -35,22 +35,22 @@ dependencies {
     // Import the Spring Cloud BOM
     implementation(enforcedPlatform("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion"))
 
-    // Spring boot basic
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    // implementation("org.springframework.boot:spring-boot-starter-validation")
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
-
-    implementation("org.springframework.cloud:spring-cloud-stream")
-    implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka")
-    implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka-streams")
-    implementation("org.springframework.cloud:spring-cloud-function-kotlin")
-
     // Kotlin
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
-//    implementation("ch.qos.logback:logback-classic:$logbackVersion")
+    // implementation("ch.qos.logback:logback-classic:$logbackVersion")
+
+    // Spring boot basic
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    // implementation("org.springframework.boot:spring-boot-starter-validation")
+
+    // Spring cloud streams
+    implementation("org.springframework.cloud:spring-cloud-stream")
+//    implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka")
+    implementation("org.springframework.cloud:spring-cloud-stream-binder-kafka-streams")
+    implementation("org.springframework.cloud:spring-cloud-function-kotlin")
 
     // Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core")
@@ -100,6 +100,6 @@ noArg {
 }
 
 springBoot {
-    mainClass.set("com.example.payments.ApplicationKt")
+    mainClass.set("com.example.aggregator.ApplicationKt")
     buildInfo()
 }

@@ -7,4 +7,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "aggregated-payments-app"
+rootProject.name = "aggregator-service"

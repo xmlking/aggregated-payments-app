@@ -1,6 +1,6 @@
 @file:Suppress("ktlint:standard:no-wildcard-imports")
 
-package com.example.payments.sumo
+package com.example.aggregator.cli
 
 import com.github.avrokotlin.avro4k.*
 import io.github.oshai.kotlinlogging.KotlinLogging
