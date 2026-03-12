@@ -5,59 +5,59 @@ spring:
     timeout-per-shutdown-phase: "10s"
   cloud:
     function:
-#      definition: aggregate
-      definition: uppercase
+      definition: uppercase;aggregate
     stream:
       bindings:
         uppercase-in-0:
-          destination: "uppercase.in"
+          destination: "uppercase.in.v1"
+          group: uppercase-consumer-group
+          # contentType: application/json
+          consumer:
+            max-attempts: 3                   # retry delivery attempts
+            back-off-initial-interval: 500    # wait time before first retry (ms)
+            back-off-max-interval: 10000      # The maximum backoff interval (ms)
+            back-off-multiplier: 2.0          # retry delay grows exponentially. 1.0 means fixed retry delay
+            default-retryable: false          # should we retry all the exceptions? Default: true
+            retryable-exceptions:
+              com.example.aggregator.exceptions.BadRequestException: false # do not retry
+              com.example.aggregator.exceptions.MissingDataException: false # do not retry
+              com.example.aggregator.exceptions.TimeoutException: true #  retry
         uppercase-out-0:
-          destination: "uppercase.out"
+          destination: "uppercase.out.v1"
 
         aggregate-in-0:
-          destination: topic-1
-          group: kafka-aggregator
+          destination: topic-1,topic-2,topic-3,topic-4
+          group: aggregator-consumer-group
+          # contentType: application/json
           consumer:
             use-native-decoding: true   # let Kafka Streams handle deserialization
-
-        aggregate-in-1:
-          destination: topic-2
-          group: kafka-aggregator
-          consumer:
-            use-native-decoding: true
-
-        aggregate-in-2:
-          destination: topic-3
-          group: kafka-aggregator
-          consumer:
-            use-native-decoding: true
-
-        aggregate-in-3:
-          destination: topic-4
-          group: kafka-aggregator
-          consumer:
-            use-native-decoding: true
-
         aggregate-out-0:
           destination: aggregated-topic
           producer:
             use-native-encoding: true   # let Kafka Streams handle serialization
-
-#      # see DefaultPollerProperties
-#      poller:
-#        # call the Supplier Bean every 2 second
-#        fixed-delay: 2000
       kafka:
         streams:
           binder:
-            applicationId: "${spring.application.name}"
-            brokers: "localhost:19092"
+            brokers: ${KAFKA_BROKERS:localhost:19092}
+            autoCreateTopics: true
+            minPartitionCount: 1
+#            consumer-properties:
+#              auto.offset.reset: earliest
+#              max.poll.records: 20
             configuration:
               processing.guarantee: exactly_once_v2
               commit.interval.ms: 100
-#              default:
-#                key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-#                value.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+          bindings:
+            uppercase-in-0:
+              consumer:
+                application-id: "${spring.application.name}-uppercase"
+                enable-dlq: true
+                dlq-name: uppercase.dlq.v1
+                dlq-partitions: 1
+            aggregate-in-0:
+              consumer:
+                application-id: "${spring.application.name}-aggregate"
+
 
 # ── Actuator ──────────────────────────────────────────────────────────────────
 management:
@@ -66,6 +66,8 @@ management:
       exposure:
         include: health, info, metrics, env, prometheus, bindings, kafkastreamstopology
   endpoint:
+    info:
+      enabled: true
     health:
       show-details: always
       probes:
@@ -105,5 +107,5 @@ logging:
 
 # ── Application Properties ────────────────────────────────────────────────────
 feature:
-  postMvp:
+  myDemoFlag:
     enabled: false

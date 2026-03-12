@@ -35,29 +35,11 @@ class AggregatorTopology {
         }
 
     @Bean
-    fun aggregate(): Function<Array<KStream<String, SourceMessage>>, KStream<String, AggregatedMessage>> =
-        Function { inputs ->
-            require(inputs.size == 4) {
-                "Expected exactly 4 input streams, got ${inputs.size}"
-            }
-
-            val (stream1, stream2, stream3, stream4) = inputs
-
-            // Tag each stream with its logical source name before merging
-            val tagged1 = stream1.tagSource("topic-1")
-            val tagged2 = stream2.tagSource("topic-2")
-            val tagged3 = stream3.tagSource("topic-3")
-            val tagged4 = stream4.tagSource("topic-4")
-
-            // Merge all 4 streams into one
-            val merged: KStream<String, SourceMessage> =
-                tagged1
-                    .merge(tagged2)
-                    .merge(tagged3)
-                    .merge(tagged4)
-
-            // Transform each SourceMessage into an AggregatedMessage
-            merged
+    fun aggregate(): Function<KStream<String, SourceMessage>, KStream<String, AggregatedMessage>> =
+        Function { input ->
+            // All 4 source topics are merged by the binder via comma-separated destinations in application.yml.
+            // The source field is expected to be set by the producer.
+            input
                 .peek { key, msg ->
                     logger.info { "Aggregating message key=$key source=${msg.source}" }
                 }.mapValues { sourceMsg ->
@@ -75,13 +57,4 @@ class AggregatorTopology {
                     }
                 }
         }
-
-    // ── Extension helpers ────────────────────────────────────────────────────
-
-    /**
-     * Ensures the [SourceMessage.source] field reflects the logical topic name.
-     * Useful when the producer did not set a source or set it incorrectly.
-     */
-    private fun KStream<String, SourceMessage>.tagSource(sourceName: String): KStream<String, SourceMessage> =
-        mapValues { msg -> msg.copy(source = sourceName) }
 }
